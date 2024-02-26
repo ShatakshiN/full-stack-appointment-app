@@ -16,6 +16,10 @@ app.post('/add-user',async (req,res,next)=>{
             throw new Error('require phone no')
         }
 
+        if (!/^\d+$/.test(req.body.contact)) {
+            throw new Error('Invalid phone number format');
+        }
+
         if (!req.body.name){
             throw new Error('require name')
 
@@ -49,7 +53,31 @@ app.get('/add-user', async (req,res,next)=>{
 
     const users =  await User.findAll();
     res.status(200).json({allUser : users})
-})
+});
+
+// Add a new endpoint for deleting a user
+app.delete('/delete-user/:userId', async (req, res, next) => {
+    const userId = req.params.userId;
+
+    try {
+        // Find the user by ID
+        const user = await User.findByPk(userId);
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        // Delete the user
+        await user.destroy();
+
+        res.status(200).json({ message: 'User deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
+
 
 sequelize.sync()
     .then(user =>{
@@ -59,3 +87,5 @@ sequelize.sync()
 
     })
     .catch(err => console.log(err));
+
+
